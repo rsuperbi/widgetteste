@@ -1,225 +1,37 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <title>Widget de Chat IA</title>
-  <style>
-    #ai-widget-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      font-family: Arial, sans-serif;
-      z-index: 9999;
-    }
-    #ai-widget-toggle {
-      width: 60px;
-      height: 60px;
-      background: #8540F5;
-      color: #fff;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      position: relative;
-      overflow: hidden;
-    }
-    #ai-widget-toggle img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    #ai-widget-toggle span {
-      position: absolute;
-      color: white;
-      font-weight: bold;
-      z-index: 2;
-    }
-    #ai-widget {
-      width: 320px;
-      height: 400px;
-      background: #fff;
-      border: 1px solid #ddd;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      margin-bottom: 10px;
-    }
-    #ai-widget header {
-      background: #8540F5;
-      color: #fff;
-      padding: 10px;
-      text-align: center;
-      position: relative;
-    }
-    #ai-widget header .ai-widget-close {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      cursor: pointer;
-    }
-    #ai-widget .messages {
-      flex-grow: 1;
-      padding: 10px;
-      overflow-y: auto;
-      background: #f9f9f9;
-    }
-    #ai-widget footer {
-      padding: 10px;
-      border-top: 1px solid #eee;
-      display: flex;
-    }
-    #ai-widget footer input[type="text"] {
-      flex-grow: 1;
-      padding: 5px;
-    }
-    #ai-widget footer button {
-      width: 50px;
-      margin-left: 5px;
-    }
-    #ai-widget .user {
-      margin-bottom: 5px;
-      text-align: right;
-      color: #333;
-      background-color: #e3f2fd;
-      padding: 8px 12px;
-      border-radius: 15px 15px 0 15px;
-      max-width: 80%;
-      margin-left: auto;
-      float: right;
-      clear: both;
-    }
-    #ai-widget .ia {
-      margin-bottom: 5px;
-      text-align: left;
-      color: #333;
-      background-color: #f5f5f5;
-      padding: 8px 12px;
-      border-radius: 15px 15px 15px 0;
-      max-width: 80%;
-      float: left;
-      clear: both;
-    }
-    #ai-widget .error {
-      margin-bottom: 5px;
-      text-align: center;
-      color: red;
-      background-color: #ffebee;
-      padding: 8px 12px;
-      border-radius: 15px;
-      float: left;
-      clear: both;
-      width: 90%;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget IA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f9f9f9;
+        }
+        .widget-container {
+            width: 300px;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <!-- Widget de Chat IA -->
-  <script>
-    (function() {
-      // Criar container principal
-      var container = document.createElement('div');
-      container.id = 'ai-widget-container';
-      
-      // Criar botão de toggle
-      var toggleButton = document.createElement('div');
-      toggleButton.id = 'ai-widget-toggle';
-      
-      // Criar elementos para a imagem e o texto
-      var img = document.createElement('img');
-      img.src = 'logo.png'; // Substitua pela URL da sua imagem
-      img.alt = 'Chat IA';
-      
-      var span = document.createElement('span');
-      span.textContent = 'Chat';
-      
-      toggleButton.appendChild(img);
-      toggleButton.appendChild(span);
-      container.appendChild(toggleButton);
-      
-      // Criar widget de chat
-      var chatWidget = document.createElement('div');
-      chatWidget.id = 'ai-widget';
-      chatWidget.style.display = 'none';
-      
-      var header = document.createElement('header');
-      header.innerHTML = 'Chat IA <span class="ai-widget-close">×</span>';
-      chatWidget.appendChild(header);
-      
-      var messages = document.createElement('div');
-      messages.className = 'messages';
-      chatWidget.appendChild(messages);
-      
-      var footer = document.createElement('footer');
-      footer.innerHTML = '<input type="text" id="ai-input" placeholder="Digite sua mensagem..."><button id="ai-send">Enviar</button>';
-      chatWidget.appendChild(footer);
-      
-      container.appendChild(chatWidget);
-      document.body.appendChild(container);
-      
-      function addMessage(text, type) {
-        var message = document.createElement('div');
-        message.className = type;
-        message.textContent = text;
-        messages.appendChild(message);
-        messages.scrollTop = messages.scrollHeight;
-      }
-      
-      function sendMessage() {
-        var input = document.getElementById('ai-input');
-        var userText = input.value.trim();
-        if (!userText) return;
-        addMessage('Você: ' + userText, 'user');
-        input.value = '';
-        
-        var payload = {
-          model: "gpt-3.5-turbo",
-          messages: [{"role": "user", "content": userText}]
-        };
-        
-        fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer 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'
-          },
-          body: JSON.stringify(payload)
-        })
-        .then(function(response) {
-          if (!response.ok) throw new Error('Erro na chamada da API');
-          return response.json();
-        })
-        .then(function(data) {
-          var aiResponse = data.choices && data.choices[0].message.content;
-          addMessage('IA: ' + (aiResponse || 'Sem resposta'), 'ia');
-        })
-        .catch(function(error) {
-          console.error('Erro:', error);
-          addMessage('Erro ao obter resposta', 'error');
-        });
-      }
-      
-      // Event Listeners
-      chatWidget.querySelector('#ai-send').addEventListener('click', sendMessage);
-      chatWidget.querySelector('#ai-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') sendMessage();
-      });
-      
-      toggleButton.addEventListener('click', function() {
-        chatWidget.style.display = 'flex';
-        toggleButton.style.display = 'none';
-        span.style.display = 'none'; // Esconde o texto "Chat" quando o widget é aberto
-      });
-      
-      chatWidget.querySelector('.ai-widget-close').addEventListener('click', function() {
-        chatWidget.style.display = 'none';
-        toggleButton.style.display = 'flex';
-        span.style.display = 'block'; // Mostra o texto "Chat" quando o widget é fechado
-      });
-    })();
-  </script>
-  <script src="https://rsuperbi.github.io/widgetteste/widget.js"></script>
+    <div class="widget-container">
+        <h2>Chat com IA</h2>
+        <p>Digite sua mensagem:</p>
+        <input type="text" placeholder="Escreva aqui..." />
+        <button>Enviar</button>
+    </div>
 </body>
-</html> 
+</html>
